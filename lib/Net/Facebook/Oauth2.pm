@@ -162,13 +162,13 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protoco
     
     my $fb = Net::Facebook::Oauth2->new(
         application_id => 'your_application_id', 
-        application_secret => 'your_application_secret'
+        application_secret => 'your_application_secret',
+        callback => 'http://yourdomain.com/facebook/callback'
     );
     
     ###get authorization URL for your application
     my $url = $fb->get_authorization_url(
         scope => ['offline_access','publish_stream'],
-        callback => 'http://yourdomain.com/facebook/callback',
         display => 'page'
     );
     
@@ -182,7 +182,8 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protoco
     
     my $fb = Net::Facebook::Oauth2->new(
         application_id => 'your_application_id',
-        application_secret => 'your_application_secret'
+        application_secret => 'your_application_secret',
+        callback => 'http://yourdomain.com/facebook/callback'
     );
     
     my $access_token = $fb->get_access_token(code => $cgi->param('code'));
