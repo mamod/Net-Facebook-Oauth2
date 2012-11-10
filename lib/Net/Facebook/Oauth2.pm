@@ -7,6 +7,10 @@ use URI::Escape;
 use JSON::Any;
 use Carp;
 
+
+use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
+use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
+
 our $VERSION = '0.03';
 
 sub new {
@@ -20,8 +24,8 @@ sub new {
     }
     
     $self->{browser} = LWP::UserAgent->new;
-    $self->{access_token_url} = $options{access_token_url} || "https://graph.facebook.com/oauth/access_token";
-    $self->{authorize_url} = $options{authorize_url} || "https://www.facebook.com/dialog/oauth";
+    $self->{access_token_url} = $options{access_token_url} || ACCESS_TOKEN_URL;
+    $self->{authorize_url} = $options{authorize_url} || AUTHORIZE_URL;
     $self->{access_token} = $options{access_token};
     $self->{display} = $options{display} || 'page'; ##other values popup and wab
     return bless($self, $class);
@@ -62,22 +66,23 @@ sub get_access_token {
     $self->{options}->{code} = $params{code};
     
     ###generating access token URL
-    my $getURL = $self->{access_token_url}."?client_id="
-    .$self->{options}->{application_id}
+    my $getURL = $self->{access_token_url}
+    ."?client_id="
+    .uri_escape($self->{options}->{application_id})
     ."&redirect_uri="
-    .$params{callback}
+    .uri_escape($params{callback})
     ."&client_secret="
-    .$self->{options}->{application_secret}.
-    "&code=$params{code}";
+    .uri_escape($self->{options}->{application_secret})
+    ."&code=$params{code}";
     
     my $response = $self->{browser}->get($getURL);
     
     ##got an error response from facebook
     ##die and display error message
-    if ($response->{_rc} =~ /^4/){
+    if (!$response->is_success){
         my $j = JSON::Any->new;
         my $error = $j->jsonToObj($response->content());
-        croak "'".$error->{error}->{type}."'"." ".$error->{error}->{message};
+        croak "'" .$error->{error}->{type}. "'" . " " .$error->{error}->{message};
     }
     
     ##everything is ok proccess response and extract access token
@@ -108,22 +113,17 @@ sub get {
     
     $url .= "?access_token="
     .$self->{access_token};
-    
     $url .= "&".$string if $string;
     
     my $response = $self->{browser}->get($url);
     my $content = $response->content();
     return $self->_content($content);
-    
 }
 
 sub post {
-    
     my ($self,$url,$params) = @_;
     croak "You must pass access_token" unless defined $self->{access_token};
-    
     $params->{access_token} = $self->{access_token};
-    
     my $response = $self->{browser}->post($url,$params);
     my $content = $response->content();
     return $self->_content($content);
