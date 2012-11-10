@@ -11,7 +11,7 @@ use Carp;
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
 use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
     my ($class,%options) = @_;
@@ -45,8 +45,9 @@ sub get_authorization_url {
     
     my $url = $self->{authorize_url}
     ."?client_id="
-    .$self->{options}->{application_id}
-    ."&redirect_uri=".$params{callback};
+    .uri_escape($self->{options}->{application_id})
+    ."&redirect_uri="
+    .uri_escape($params{callback});
     
     $url .= "&scope=$scope" if $scope;
     $url .= "&display=".$params{display};
@@ -91,8 +92,13 @@ sub get_access_token {
     my ($string,$token) = split(/=/, $access_token);
     
     ###save access token
-    $self->{access_token} = $token if $token;
-    return $token;
+    if ($token){
+        $self->{access_token} = $token;
+        return $token;
+    }
+    
+    croak "can't get access token";
+    
 }
 
 
