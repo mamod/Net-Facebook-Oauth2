@@ -11,7 +11,7 @@ use Carp;
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
 use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
 
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 sub new {
     my ($class,%options) = @_;
@@ -98,7 +98,6 @@ sub get_access_token {
     }
     
     croak "can't get access token";
-    
 }
 
 
