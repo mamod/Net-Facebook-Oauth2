@@ -3,6 +3,7 @@ package Net::Facebook::Oauth2;
 use strict;
 use warnings;
 use LWP::UserAgent;
+use URI;
 use URI::Escape;
 use JSON::Any;
 use Carp;
@@ -102,9 +103,11 @@ sub get_access_token {
 
 
 sub get {
-    
     my ($self,$url,$params) = @_;
-    croak "You must pass access_token" unless defined $self->{access_token};
+    unless ($self->_has_access_token($url)) {
+        croak "You must pass access_token" unless defined $self->{access_token};
+        $url .= "?access_token=" . $self->{access_token};
+    }    
     
     ##construct the new url
     my @array;
@@ -115,9 +118,6 @@ sub get {
     }
 
     my $string = join('&', @array);
-    
-    $url .= "?access_token="
-    .$self->{access_token};
     $url .= "&".$string if $string;
     
     my $response = $self->{browser}->get($url);
@@ -127,8 +127,10 @@ sub get {
 
 sub post {
     my ($self,$url,$params) = @_;
-    croak "You must pass access_token" unless defined $self->{access_token};
-    $params->{access_token} = $self->{access_token};
+    unless ($self->_has_access_token($url)) {
+        croak "You must pass access_token" unless defined $self->{access_token};
+        $params->{access_token} = $self->{access_token};
+    }
     my $response = $self->{browser}->post($url,$params);
     my $content = $response->content();
     return $self->_content($content);
@@ -151,6 +153,15 @@ sub _content {
     return $self;
 }
 
+sub _has_access_token {
+    my ($self, $url) = @_;
+    my $uri = URI->new($url);
+    my %q = $uri->query_form;
+    if (grep { $_ eq 'access_token' } keys %q) {
+        return 1;
+    }
+    return;
+}
 
 1;
 
