@@ -6,3 +6,4 @@ install:
   - "cpanm -n Plack"
   - "cpanm -n JSON::Any"
   - "cpanm -n Test::MockModule"
+  - "cpanm -n Test::MockObject"
