@@ -4,3 +4,5 @@ perl:
   - "5.14"
 install:
   - "cpanm -n Plack"
+  - "cpanm -n JSON::Any"
+  - "cpanm -n Test::MockModule"
