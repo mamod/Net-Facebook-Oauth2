@@ -138,8 +138,10 @@ sub post {
 
 sub delete {
     my ($self,$url,$params) = @_;
-    croak "You must pass access_token" unless defined $self->{access_token};
-    $params->{access_token} = $self->{access_token};
+    unless ($self->_has_access_token($url)) {
+        croak "You must pass access_token" unless defined $self->{access_token};
+        $params->{access_token} = $self->{access_token};
+    }
     my $response = $self->{browser}->delete($url,$params);
     my $content = $response->content();
     return $self->_content($content);
