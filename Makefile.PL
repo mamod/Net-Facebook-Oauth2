@@ -11,6 +11,11 @@ WriteMakefile(
         JSON::Any => 0
         
     },
+    BUILD_REQUIRES => {
+        Test::Exception  => 0,
+        Test::MockObject => 0,
+        Test::MockModule => 0,
+    },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Net/Facebook/Oauth2.pm', # retrieve abstract from module
        AUTHOR         => 'Mahmoud A. Mehyar <mamod.mehyar@gmail.com>') : ()),

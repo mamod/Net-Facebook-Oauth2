@@ -24,7 +24,7 @@ sub new {
         croak "Yuo must provide your application secret when construct new method\n Net::Facebook::Oauth2->new( application_secret => '...' )" unless defined $self->{options}->{application_secret};
     }
     
-    $self->{browser} = LWP::UserAgent->new;
+    $self->{browser}          = $options{browser} || LWP::UserAgent->new;
     $self->{access_token_url} = $options{access_token_url} || ACCESS_TOKEN_URL;
     $self->{authorize_url} = $options{authorize_url} || AUTHORIZE_URL;
     $self->{access_token} = $options{access_token};
@@ -132,6 +132,15 @@ sub post {
         $params->{access_token} = $self->{access_token};
     }
     my $response = $self->{browser}->post($url,$params);
+    my $content = $response->content();
+    return $self->_content($content);
+}
+
+sub delete {
+    my ($self,$url,$params) = @_;
+    croak "You must pass access_token" unless defined $self->{access_token};
+    $params->{access_token} = $self->{access_token};
+    my $response = $self->{browser}->delete($url,$params);
     my $content = $response->content();
     return $self->_content($content);
 }
