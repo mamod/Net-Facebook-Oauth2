@@ -6,7 +6,6 @@ use Net::Facebook::Oauth2;
 eval "use Test::Requires qw/Plack::Loader Test::TCP Plack::Request/";
 plan skip_all => 'Test::Requires required for testing with Test::TCP' if $@;
 
-
 my $app = sub {
     my $env = shift;
     my $req = Plack::Request->new($env);
@@ -44,5 +43,7 @@ test_tcp(
         $server->run($app);
     },
 );
+
 done_testing;
+
 __END__

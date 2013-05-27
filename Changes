@@ -9,3 +9,8 @@ Revision history for Perl extension Net::Facebook::Oauth2.
 	- Fixed some bugs
 	- Fixed documentations and examples
 	- Added more examples
+
+0.06  Mon May 28 16:00:00 2013
+	- Allow Browser options to pass in by & tests (William Bellamy)
+	- Changed behavior to access_token & tests by (Takatsugu Shigeta)
+	

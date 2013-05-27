@@ -8,7 +8,6 @@ use URI::Escape;
 use JSON::Any;
 use Carp;
 
-
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
 use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
 
@@ -26,9 +25,10 @@ sub new {
     
     $self->{browser}          = $options{browser} || LWP::UserAgent->new;
     $self->{access_token_url} = $options{access_token_url} || ACCESS_TOKEN_URL;
-    $self->{authorize_url} = $options{authorize_url} || AUTHORIZE_URL;
-    $self->{access_token} = $options{access_token};
-    $self->{display} = $options{display} || 'page'; ##other values popup and wab
+    $self->{authorize_url}    = $options{authorize_url} || AUTHORIZE_URL;
+    $self->{access_token}     = $options{access_token};
+    $self->{display}          = $options{display} || 'page'; ##other values popup and wab
+    
     return bless($self, $class);
 }
 
@@ -100,7 +100,6 @@ sub get_access_token {
     
     croak "can't get access token";
 }
-
 
 sub get {
     my ($self,$url,$params) = @_;
@@ -278,7 +277,8 @@ URL redirect user there in order to authorize your application
 
 Array of Extended permissions as described by facebook Oauth2.0 API
 you can get more information about scope/Extended Permission from
-http://developers.facebook.com/docs/authentication/permissions
+
+L<http://developers.facebook.com/docs/authentication/permissions>
 
 =item * C<callback>
 
@@ -382,7 +382,7 @@ hashref of parameters to be sent with graph API URL
 =back
 
 For more information about facebook grapg API, please check
-http://developers.facebook.com/docs/api
+L<http://developers.facebook.com/docs/api>
 
 =head1 AUTHOR
 
@@ -390,7 +390,7 @@ Mahmoud A. Mehyar, E<lt>mamod.mehyar@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Mahmoud A. Mehyar
+Copyright (C) 2012-2013 by Mahmoud A. Mehyar
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,

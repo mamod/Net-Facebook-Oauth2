@@ -6,10 +6,11 @@ use strict;
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
-use Test::Exception;
-use Test::MockObject;
-use Test::MockModule;
-use Test::More tests => 7;
+use Test::More 'no_plan';
+
+eval "use Test::Requires qw/Test::Exception Test::MockObject Test::MockModule/";
+plan skip_all => 'Test::Requires required for testing' if $@;
+
 BEGIN { use_ok('Net::Facebook::Oauth2') };
 
 #########################
@@ -145,3 +146,5 @@ sub _mock_object {
     }
     return $mock_object;
 }
+
+
