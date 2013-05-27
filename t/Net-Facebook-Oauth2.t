@@ -1,33 +1,33 @@
 use warnings;
 use strict;
 use Net::Facebook::Oauth2;
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl Net-Facebook-Oauth2.t'
+use Test::More;
 
 #########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-use Test::More 'no_plan';
-
-eval "use Test::Requires qw/Test::Exception Test::MockObject Test::MockModule/";
-plan skip_all => 'Test::Requires required for testing' if $@;
-
 #########################
 # Fixture Data
 my $app_id       = 'testapp_id';
 my $app_secret   = 'test_app_secret';
 my $access_token = 'test_access_token';
 my $url          = 'test.www.com';
-
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
-
 my $class = 'Net::Facebook::Oauth2';
 
-can_instantiate_class();
-test_get_method_with_no_browser_parameter();
-can_pass_browser_param();
-can_do_delete_request();
+eval "use Test::Requires qw/Test::Exception Test::MockObject Test::MockModule/";
+if ($@){
+    plan skip_all => 'Test::Requires required for testing';
+} else {
+    
+    #had to re use??!
+    use Test::Exception;
+    use Test::MockObject;
+    use Test::MockModule;
+
+    can_instantiate_class();
+    test_get_method_with_no_browser_parameter();
+    can_pass_browser_param();
+    can_do_delete_request();
+    done_testing();
+}
 
 
 sub can_instantiate_class {
@@ -38,7 +38,7 @@ sub can_instantiate_class {
     );
 
     ok $net_fb_oauth2,
-      'Can instantiate $class with application_id and application_secret';
+      "Can instantiate $class with application_id and application_secret";
 
     dies_ok { $class->new( application_id => $app_id ) }
      'Dies if no application_secret passed to constructor';
@@ -145,5 +145,4 @@ sub _mock_object {
     }
     return $mock_object;
 }
-
 
