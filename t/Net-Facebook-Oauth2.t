@@ -11,8 +11,6 @@ use Test::More 'no_plan';
 eval "use Test::Requires qw/Test::Exception Test::MockObject Test::MockModule/";
 plan skip_all => 'Test::Requires required for testing' if $@;
 
-BEGIN { use_ok('Net::Facebook::Oauth2') };
-
 #########################
 # Fixture Data
 my $app_id       = 'testapp_id';
