@@ -1,7 +1,10 @@
 Changes
+examples/Catalyst/Facebook.pm
+examples/CGI/facebook.pl
+lib/Net/Facebook/Oauth2.pm
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 README.pod
-t/Net-Facebook-Oauth2.t
 t/accesstoken.t
-lib/Net/Facebook/Oauth2.pm
+t/Net-Facebook-Oauth2.t
