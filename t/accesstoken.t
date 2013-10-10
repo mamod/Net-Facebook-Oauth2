@@ -15,7 +15,18 @@ my $app = sub {
         is $access_token, 'AccessToken', $message;
     } elsif ($message =~ m/with access token/) {
         is $access_token, 'OtherToken', $message;
+    } elsif ($message =~ m/with already set query/) {
+        my $query = $env->{QUERY_STRING};
+        ok($query !~ /limit=1000\?/);
+        ok($query =~ /^limit=1000&access_token/);
+    } elsif ($message =~ m/without already set query/) {
+        my $query = $env->{QUERY_STRING};
+        ok($query =~ /^access_token/);
+    } elsif ($message =~ m/Get request with token and query/) {
+        my $query = $env->{QUERY_STRING};
+        ok($query =~ /^limit=1000&access_token=OtherToken&message/);
     }
+    
     return [ 200, [ 'Content-Type' => 'text/plain' ], [ 'OK' ] ];
 };
 
@@ -33,6 +44,12 @@ test_tcp(
         $fb->post("$url?access_token=OtherToken", { message => 'Post request with access token' });
         $fb->get($url, { message => 'Get request without access token' });
         $fb->get("$url?access_token=OtherToken", { message => 'Get request with access token' });
+        
+        ##new bug tests -- adding query to another query ?limit=100?access_token
+        $fb->get("$url?limit=1000", { message => 'Get request with already set query' });
+        $fb->get("$url", { message => 'Get request without already set query' });
+        $fb->get("$url?limit=1000&access_token=OtherToken", { message => 'Get request with token and query' });
+        
     },
     server => sub {
         my $port = shift;
@@ -44,6 +61,6 @@ test_tcp(
     },
 );
 
-done_testing;
+done_testing(8);
 
 __END__

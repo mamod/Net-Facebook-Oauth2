@@ -11,7 +11,7 @@ use Carp;
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
 use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
     my ($class,%options) = @_;
@@ -33,7 +33,6 @@ sub new {
 }
 
 sub get_authorization_url {
-    
     my ($self,%params) = @_;
     
     $params{callback} ||= $self->{options}->{callback};
@@ -58,7 +57,6 @@ sub get_authorization_url {
 
 
 sub get_access_token {
-    
     my ($self,%params) = @_;
     $params{callback} ||= $self->{options}->{callback};
     $params{code} ||= $self->{options}->{code};
@@ -105,8 +103,9 @@ sub get {
     my ($self,$url,$params) = @_;
     unless ($self->_has_access_token($url)) {
         croak "You must pass access_token" unless defined $self->{access_token};
-        $url .= "?access_token=" . $self->{access_token};
-    }    
+        $url .= $self->{_has_query} ? '&' : '?';
+        $url .= "access_token=" . $self->{access_token};
+    }
     
     ##construct the new url
     my @array;
@@ -167,6 +166,8 @@ sub _has_access_token {
     my ($self, $url) = @_;
     my $uri = URI->new($url);
     my %q = $uri->query_form;
+    #also check if we have a query and save result
+    $self->{_has_query} = $uri->query();
     if (grep { $_ eq 'access_token' } keys %q) {
         return 1;
     }
