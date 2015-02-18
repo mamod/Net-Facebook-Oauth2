@@ -19,8 +19,8 @@ sub new {
     $self->{options} = \%options;
     
     if (!$options{access_token}){
-        croak "Yuo must provide your application id when construct new method\n Net::Facebook::Oauth2->new( application_id => '...' )" unless defined $self->{options}->{application_id};
-        croak "Yuo must provide your application secret when construct new method\n Net::Facebook::Oauth2->new( application_secret => '...' )" unless defined $self->{options}->{application_secret};
+        croak "You must provide your application id when construct new method\n Net::Facebook::Oauth2->new( application_id => '...' )" unless defined $self->{options}->{application_id};
+        croak "You must provide your application secret when construct new method\n Net::Facebook::Oauth2->new( application_secret => '...' )" unless defined $self->{options}->{application_secret};
     }
     
     $self->{browser}          = $options{browser} || LWP::UserAgent->new;
