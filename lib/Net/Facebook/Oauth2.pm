@@ -178,6 +178,9 @@ __END__
 
 Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protocol
 
+=for html
+<a href="https://travis-ci.org/mamod/Net-Facebook-Oauth2"><img src="https://travis-ci.org/mamod/Net-Facebook-Oauth2.svg?branch=master"></a>
+
 =head1 SYNOPSIS
 
     use CGI;
