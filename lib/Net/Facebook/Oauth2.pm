@@ -5,7 +5,7 @@ use warnings;
 use LWP::UserAgent;
 use URI;
 use URI::Escape;
-use JSON::Any;
+use JSON::MaybeXS;
 use Carp;
 
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
@@ -80,8 +80,7 @@ sub get_access_token {
     ##got an error response from facebook
     ##die and display error message
     if (!$response->is_success){
-        my $j = JSON::Any->new;
-        my $error = $j->jsonToObj($response->content());
+        my $error = decode_json($response->content());
         croak "'" .$error->{error}->{type}. "'" . " " .$error->{error}->{message};
     }
     
@@ -147,8 +146,7 @@ sub delete {
 
 sub as_hash {
     my ($self) = @_;
-    my $j = JSON::Any->new;
-    return $j->jsonToObj($self->{content});
+    return decode_json($self->{content});
 }
 
 sub as_json {
