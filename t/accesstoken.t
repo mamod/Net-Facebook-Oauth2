@@ -26,7 +26,7 @@ my $app = sub {
         my $query = $env->{QUERY_STRING};
         ok($query =~ /^limit=1000&access_token=OtherToken&message/);
     }
-    
+
     return [ 200, [ 'Content-Type' => 'text/plain' ], [ 'OK' ] ];
 };
 
@@ -44,12 +44,12 @@ test_tcp(
         $fb->post("$url?access_token=OtherToken", { message => 'Post request with access token' });
         $fb->get($url, { message => 'Get request without access token' });
         $fb->get("$url?access_token=OtherToken", { message => 'Get request with access token' });
-        
+
         ##new bug tests -- adding query to another query ?limit=100?access_token
         $fb->get("$url?limit=1000", { message => 'Get request with already set query' });
         $fb->get("$url", { message => 'Get request without already set query' });
         $fb->get("$url?limit=1000&access_token=OtherToken", { message => 'Get request with token and query' });
-        
+
     },
     server => sub {
         my $port = shift;

@@ -16,7 +16,7 @@ eval "use Test::Requires qw/Test::Exception Test::MockObject Test::MockModule/";
 if ($@){
     plan skip_all => 'Test::Requires required for testing';
 } else {
-    
+
     #had to re use??!
     use Test::Exception;
     use Test::MockObject;
