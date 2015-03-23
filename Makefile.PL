@@ -9,7 +9,7 @@ WriteMakefile(
         'URI'            => 0,
         'Carp'           => 0,
         'URI::Escape'    => 0,
-        'JSON::Any'      => 0,
+        'JSON::MaybeXS'  => 0,
     },
     BUILD_REQUIRES => {
         'Test::More'       => 0.88,
