@@ -180,51 +180,49 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protoco
 
 =head1 SYNOPSIS
 
-    use CGI;
-    my $cgi = CGI->new;
-    
+Somewhere in your application's login process:
+
     use Net::Facebook::Oauth2;
-    
+
     my $fb = Net::Facebook::Oauth2->new(
-        application_id => 'your_application_id', 
+        application_id     => 'your_application_id', 
         application_secret => 'your_application_secret',
-        callback => 'http://yourdomain.com/facebook/callback'
+        callback           => 'http://yourdomain.com/facebook/callback'
     );
-    
-    ###get authorization URL for your application
+
+    # get the authorization URL for your application
     my $url = $fb->get_authorization_url(
-        scope => ['offline_access','publish_stream'],
+        scope   => [ 'public_profile', 'email', 'offline_access', 'publish_stream' ],
         display => 'page'
     );
-    
-    ####now redirect to this url
-    print $cgi->redirect($url);
-    
-    ##once user authorizes your application facebook will send him/her back to your application
-    ##to the callback link provided above
-    
-    ###in your callback block capture verifier code and get access_token
-    
-    my $fb = Net::Facebook::Oauth2->new(
-        application_id => 'your_application_id',
-        application_secret => 'your_application_secret',
-        callback => 'http://yourdomain.com/facebook/callback'
-    );
-    
-    my $access_token = $fb->get_access_token(code => $cgi->param('code'));
-    ###save this token in database or session
-    
-    ##later on your application you can use this verifier code to comunicate
-    ##with facebook on behalf of this user
-    
+
+Now redirect the user to this C<$url>.
+
+Once the user authorizes your application, Facebook will send him/her back
+to your application, on the C<callback> link provided above.
+
+Inside that callback route, use the verifier code parameter that Facebook
+sends to get the access token:
+
+    # param() below is a bogus function. Use whatever your web framework
+    # provides (e.g. $c->req->param('code'), $cgi->param('code'), etc)
+    my $code = param('code');
+
+    my $access_token = $fb->get_access_token(code => $code);
+
+If you got so far, your user is logged! Save this access token in your
+database or session.
+
+Later on you can use it to communicate with Facebook on behalf of this user:
+
     my $fb = Net::Facebook::Oauth2->new(
         access_token => $access_token
     );
-    
+
     my $info = $fb->get(
-        'https://graph.facebook.com/me' ##Facebook API URL
+        'https://graph.facebook.com/v2.2/me'   # Facebook API URL
     );
-    
+
     print $info->as_json;
 
 =head1 DESCRIPTION
@@ -278,6 +276,9 @@ Array of Extended permissions as described by facebook Oauth2.0 API
 you can get more information about scope/Extended Permission from
 
 L<http://developers.facebook.com/docs/authentication/permissions>
+
+Please note that requesting information other than C<public_profile>,
+C<email> and C<user_friends> B<will require your app to be reviewed by Facebook!>
 
 =item * C<callback>
 
