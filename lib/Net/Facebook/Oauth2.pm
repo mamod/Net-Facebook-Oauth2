@@ -8,8 +8,8 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
-use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/oauth/access_token';
-use constant AUTHORIZE_URL => 'https://www.facebook.com/dialog/oauth';
+use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.2/oauth/access_token';
+use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.2/dialog/oauth';
 
 our $VERSION = '0.08';
 
