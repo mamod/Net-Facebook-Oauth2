@@ -11,7 +11,7 @@ use Carp;
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.2/oauth/access_token';
 use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.2/dialog/oauth';
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub new {
     my ($class,%options) = @_;
@@ -390,6 +390,22 @@ L<http://developers.facebook.com/docs/api>
 =head1 AUTHOR
 
 Mahmoud A. Mehyar, E<lt>mamod.mehyar@gmail.comE<gt>
+
+=head1 CONTRIBUTORS
+
+Big Thanks To
+
+=over 4
+
+=item * Takatsugu Shigeta L<https://github.com/comewalk>
+
+=item * Breno G. de Oliveira L<https://github.com/garu>
+
+=item * squinker L<https://github.com/squinker>
+
+=item * Valcho Nedelchev L<https://github.com/valchonedelchev>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
