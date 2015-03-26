@@ -231,13 +231,13 @@ Big Thanks To
 
 =over 4
 
-=item * Takatsugu Shigeta L<https://github.com/comewalk>
+=item * Takatsugu Shigeta L<@comewalk|https://github.com/comewalk>
 
-=item * Breno G. de Oliveira L<https://github.com/garu>
+=item * Breno G. de Oliveira L<@garu|https://github.com/garu>
 
-=item * squinker L<https://github.com/squinker>
+=item * squinker L<@squinker|https://github.com/squinker>
 
-=item * Valcho Nedelchev L<https://github.com/valchonedelchev>
+=item * Valcho Nedelchev L<@valchonedelchev|https://github.com/valchonedelchev>
 
 =back
 
