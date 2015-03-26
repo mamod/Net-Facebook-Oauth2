@@ -225,6 +225,22 @@ Or the old-fashioned manual way:
 
 Mahmoud A. Mehyar, E<lt>mamod.mehyar@gmail.comE<gt>
 
+=head1 CONTRIBUTORS
+
+Big Thanks To
+
+=over 4
+
+=item * Takatsugu Shigeta L<https://github.com/comewalk>
+
+=item * Breno G. de Oliveira L<https://github.com/garu>
+
+=item * squinker L<https://github.com/squinker>
+
+=item * Valcho Nedelchev L<https://github.com/valchonedelchev>
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2012-2015 by Mahmoud A. Mehyar
