@@ -8,6 +8,18 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
+BEGIN {
+    my @time = localtime;
+    if ($time[5] >= 118 && $time[4] > 8) {
+        warn "\n****************************************************************************\n"
+           . "[WARNING] This version of Net::Facebook::Oauth2 uses Facebook Graph API v2.8\n"
+           . "which is SCHEDULED FOR DEPRECATION on 5 October 2018. If this module\n"
+           . "(together with any associated code) is not updated, it may stop working!\n"
+           . "****************************************************************************\n"
+           ;
+    }
+};
+
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.8/oauth/access_token';
 use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.8/dialog/oauth';
 
@@ -183,6 +195,9 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protoco
 
 This module complies to Facebook Graph API version 2.8, the latest
 at the time of publication, B<< scheduled for deprecation on October 5th, 2018 >>.
+
+One month prior to that, using this version of Net::Facebook::Oauth2 will
+trigger a warning message.
 
 =head1 SYNOPSIS
 
