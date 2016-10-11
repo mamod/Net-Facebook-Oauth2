@@ -8,8 +8,8 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
-use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.2/oauth/access_token';
-use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.2/dialog/oauth';
+use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.8/oauth/access_token';
+use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.8/dialog/oauth';
 
 our $VERSION = '0.09';
 
@@ -41,15 +41,20 @@ sub get_authorization_url {
     $params{display} = $self->{display} unless defined $params{display};
     $self->{options}->{callback} = $params{callback};
 
-    my $scope = join(",", @{$params{scope}}) if defined($params{scope});
-
     my $url = $self->{authorize_url}
     ."?client_id="
     .uri_escape($self->{options}->{application_id})
     ."&redirect_uri="
     .uri_escape($params{callback});
 
-    $url .= "&scope=$scope" if $scope;
+    if ($params{scope}) {
+        my $scope = join(',', @{$params{scope}});
+        $url .= '&scope=' . $scope if $scope;
+    }
+    $url .= '&state=' . $params{state}                 if $params{state};
+    $url .= '&response_type=' . $params{response_type} if $params{response_type};
+    $url .= '&auth_type=' . $params{auth_type}         if $params{auth_type};
+
     $url .= "&display=".$params{display};
 
     return $url;
@@ -76,26 +81,19 @@ sub get_access_token {
     ."&code=$params{code}";
 
     my $response = $self->{browser}->get($getURL);
+    my $json     = decode_json($response->content());
 
-    ##got an error response from facebook
-    ##die and display error message
-    if (!$response->is_success){
-        my $error = decode_json($response->content());
-        croak "'" .$error->{error}->{type}. "'" . " " .$error->{error}->{message};
+    if (!$response->is_success || exists $json->{error}){
+        ##got an error response from facebook. die and display error message
+        croak "'" . $json->{error}->{type}. "'" . " " .$json->{error}->{message};
     }
-
-    ##everything is ok proccess response and extract access token
-    my $file = $response->content();
-    my ($access_token,$expires) = split(/&/, $file);
-    my ($string,$token) = split(/=/, $access_token);
-
-    ###save access token
-    if ($token){
-        $self->{access_token} = $token;
-        return $token;
+    elsif ($json->{access_token}) {
+        ##everything is ok proccess response and extract access token
+        return $self->{access_token} = $json->{access_token};
     }
-
-    croak "can't get access token";
+    else {
+        croak "can't get access token from " . $response->content();
+    }
 }
 
 sub get {
@@ -181,6 +179,11 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protoco
 =for html
 <a href="https://travis-ci.org/mamod/Net-Facebook-Oauth2"><img src="https://travis-ci.org/mamod/Net-Facebook-Oauth2.svg?branch=master"></a>
 
+=head1 FACEBOOK GRAPH API VERSION
+
+This module complies to Facebook Graph API version 2.8, the latest
+at the time of publication, B<< scheduled for deprecation on October 5th, 2018 >>.
+
 =head1 SYNOPSIS
 
 Somewhere in your application's login process:
@@ -195,7 +198,7 @@ Somewhere in your application's login process:
 
     # get the authorization URL for your application
     my $url = $fb->get_authorization_url(
-        scope   => [ 'public_profile', 'email', 'offline_access', 'publish_stream' ],
+        scope   => [ 'public_profile', 'email', 'user_about_me', 'manage_pages' ],
         display => 'page'
     );
 
@@ -216,14 +219,15 @@ sends to get the access token:
 If you got so far, your user is logged! Save this access token in your
 database or session.
 
-Later on you can use it to communicate with Facebook on behalf of this user:
+Later on you can use that access token to communicate with Facebook on behalf
+of this user:
 
     my $fb = Net::Facebook::Oauth2->new(
         access_token => $access_token
     );
 
     my $info = $fb->get(
-        'https://graph.facebook.com/v2.2/me'   # Facebook API URL
+        'https://graph.facebook.com/v2.8/me'   # Facebook API URL
     );
 
     print $info->as_json;
@@ -264,33 +268,95 @@ when you register your application
 
 =back
 
+The following arguments are I<OPTIONAL>:
+
+=over 4
+
+=item * C<access_token>
+
+If you want to instantiate an object to an existing access token, you may
+do so by passing it to this argument.
+
+=item * C<browser>
+
+The user agent that will handle requests to Facebook's API. Defaults to
+LWP::UserAgent, but can be any method that implements the methods C<get>,
+C<post> and C<delete> and whose response to such methods implements
+C<is_success> and C<content>.
+
+=item * C<display>
+
+See C<display> under the C<get_authorization_url> method below.
+
+=item * C<authorize_url>
+
+Overrides the default (2.8) API endpoint for Facebook's oauth.
+Used mostly for testing new versions.
+
+=item * C<access_token_url>
+
+Overrides the default (2.8) API endpoint for Facebook's access token.
+Used mostly for testing new versions.
+
+=item * C<auth_type>
+
+When a user declines a given permission, you must reauthorize them. But when
+you do so, any previously declined permissions will not be asked again by
+Facebook. Set this argument to C<'rerequest'> to explicitly tell the dialog
+you're re-asking for a declined permission.
+
+=back
+
 =head2 C<$fb-E<gt>get_authorization_url( %args )>
 
-Return an Authorization URL for your application, once you receive this
-URL redirect user there in order to authorize your application
+Returns an authorization URL for your application. Once you receive this
+URL, redirect your user there in order to authorize your application.
+
+The following argument is I<REQUIRED>:
+
+=over 4
+
+=item * C<callback>
+
+    callback => 'http://example.com/login/facebook/success'
+
+The callback URL, where Facebook will send users after they authorize
+your application. YOU MUST CONFIRM THIS URL ON FACEBOOK'S APP DASHBOARD.
+
+To do that, go to the App Dashboard, click Facebook Login in the right-hand
+menu, and check the B<Valid OAuth redirect URIs> in the Client OAuth Settings
+section.
+
+=back
+
+This method also accepts the following I<OPTIONAL> arguments:
 
 =over 4
 
 =item * C<scope>
 
-['offline_access','publish_stream',...]
+    scope => ['user_events','manage_pages', ...]
 
-Array of Extended permissions as described by facebook Oauth2.0 API
-you can get more information about scope/Extended Permission from
+Array of Extended permissions as described by facebook Oauth API.
+You can get more information about scope/Extended Permission from
 
-L<http://developers.facebook.com/docs/authentication/permissions>
+L<https://developers.facebook.com/docs/facebook-login/permissions/>
 
 Please note that requesting information other than C<public_profile>,
 C<email> and C<user_friends> B<will require your app to be reviewed by Facebook!>
 
-=item * C<callback>
+=item * C<state>
 
-callback URL, where facebook will send users after they authorize
-your application
+    state => '123456abcde'
+
+An arbitrary unique string provided by you to guard against Cross-site Request Forgery.
 
 =item * C<display>
 
-How to display Facebook Authorization page
+    display => 'page'
+
+How to display Facebook Authorization page. Defaults to C<page>.
+Can be any of the following:
 
 =over 4
 
@@ -310,48 +376,83 @@ facebook authorization page will fit there :)
 
 =back
 
+=item * C<response_type>
+
+    response_type => 'code'
+
+When the redirect back to the app occurs, determines whether the response
+data is in URL parameters or fragments. Defaults to C<code>, which is
+Facebook's default and useful for cases where the server handles the token
+(which is most likely why you are using this module), but can be also be
+C<token>, C<code%20token>, or C<granted_scopes>. Please see
+L<< Facebook's login documentation|https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow >>
+for more information.
+
 =back
 
 =head2 C<$fb-E<gt>get_access_token( %args )>
 
-Returns access_token string
-One arg to pass
+This method issues a GET request to Facebook's API to retrieve the
+access token string for the specified code (passed as an argument).
+
+Returns the access token string or raises an exception in case of errors.
+
+You should call this method inside the route for the callback URI defined
+in the C<get_authorization_url> method. It receives the following arguments:
 
 =over 4
 
 =item * C<code>
 
-This is the verifier code that facebook send back to your
+This is the verifier code that Facebook sends back to your
 callback URL once user authorize your app, you need to capture
-this code and pass to this method in order to get access_token
+this code and pass to this method in order to get the access token.
 
 Verifier code will be presented with your callback URL as code
-parameter as the following
+parameter as the following:
 
 http://your-call-back-url.com?code=234er7y6fdgjdssgfsd...
 
-When access token is returned you need to save it in a secure
-place in order to use it later in your application
+Note that if you have fiddled with the C<response_type> argument,
+you might not get this parameter properly.
 
 =back
 
-=head2 C<$fb-E<gt>get( $url,$args )>
+When the access token is returned you need to save it in a secure
+place in order to use it later in your application. The token indicates
+that a user has authorized your site/app, meaning you can associate that
+token to that user and issue API requests to Facebook on their behalf.
 
-Send get request to facebook and returns response back from facebook
+To know I<WHICH> user has granted you the authorization (e.g. when building
+a login system to associate that token with a unique user on your database),
+you must make a request to fetch Facebook's own unique identifier for that
+user, and then associate your own user's unique id to Facebook's. This is
+usually done by making a GET request to the C<me> API endpoint, as shown
+in the SYNOPSIS.
+
+B<IMPORTANT:> Expect that the length of all access token types will change
+over time as Facebook makes changes to what is stored in them and how they
+are encoded. You can expect that they will grow and shrink over time.
+Please use a variable length data type without a specific maximum size to
+store access tokens.
+
+=head2 C<$fb-E<gt>get( $url, $args )>
+
+Sends a GET request to Facebook and stores the response in the given object.
 
 =over 4
 
 =item * C<url>
 
-Facebook Graph API URL as string
+Facebook Graph API URL as string. You must provide the full URL.
 
 =item * C<$args>
 
-hashref of parameters to be sent with graph API URL if required
+hashref of parameters to be sent with graph API URL if required.
 
 =back
 
-The response returned can be formatted as the following
+You can access the response using the following methods:
 
 =over 4
 
@@ -365,12 +466,14 @@ Returns response as perl hashref
 
 =back
 
-For more information about facebook grapg API, please check
+For more information about facebook graph API, please check
 http://developers.facebook.com/docs/api
 
-=head2 C<$fb-E<gt>post( $url,$args )>
+=head2 C<$fb-E<gt>post( $url, $args )>
 
-Send post request to facebook API, usually to post something
+Send a POST request to Facebook and stores the response in the given object.
+See the C<as_hash> and C<as_json> methods above for how to retrieve the
+response.
 
 =over 4
 
@@ -384,8 +487,25 @@ hashref of parameters to be sent with graph API URL
 
 =back
 
-For more information about facebook grapg API, please check
+For more information about facebook graph API, please check
 L<http://developers.facebook.com/docs/api>
+
+=head2 C<$fb-E<gt>delete( $url, $args )>
+
+Send a DELETE request to Facebook and stores the response in the given object.
+See the C<as_hash> and C<as_json> methods above for how to retrieve the
+response.
+
+=over 4
+
+=item * C<url>
+
+Facebook Graph API URL as string
+
+=item * C<$args>
+
+hashref of parameters to be sent with graph API URL
+
 
 =head1 AUTHOR
 

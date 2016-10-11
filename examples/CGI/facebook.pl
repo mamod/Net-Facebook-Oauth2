@@ -81,7 +81,7 @@ sub get {
     );
 
     my $friends = $fb->get(
-        'https://graph.facebook.com/v2.2/me/friends' ##Facebook friends list API URL
+        'https://graph.facebook.com/v2.8/me/friends' ##Facebook friends list API URL
     );
 
     print $cgi->header();
@@ -100,7 +100,7 @@ sub post {
     );
 
     my $res = $fb->post(
-        'https://graph.facebook.com/v2.2/me/feed', ###API URL
+        'https://graph.facebook.com/v2.8/me/feed', ###API URL
         {
             message => 'This is a post to my feed from Net::Facebook::Oauth2' ##hash of params/variables (param=>value)
         }
