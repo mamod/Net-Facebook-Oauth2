@@ -16,6 +16,10 @@ WriteMakefile(
         'Test::Exception'  => 0,
         'Test::MockObject' => 0,
         'Test::MockModule' => 0,
+        'Plack::Request'   => 0,
+        'Plack::Loader'    => 0,
+        'Test::Requires'   => 0,
+        'Test::TCP'        => 0,
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (
