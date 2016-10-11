@@ -220,7 +220,8 @@ Somewhere in your application's login process:
 Now redirect the user to this C<$url>.
 
 Once the user authorizes your application, Facebook will send him/her back
-to your application, on the C<callback> link provided above.
+to your application, on the C<callback> link provided above. PLEASE NOTE
+THAT YOU MUST PRE-AUTHORIZE YOUR CALLBACK URI ON FACEBOOK'S APP DASHBOARD.
 
 Inside that callback route, use the verifier code parameter that Facebook
 sends to get the access token:
@@ -267,11 +268,13 @@ L<http://developers.facebook.com/docs/api>
 
 =head2 C<Net::Facebook::Oauth-E<gt>new( %args )>
 
-Pass args as hash. C<%args> are:
+Returns a new object to handle user authentication.
+Pass arguments as a hash. The following arguments are I<REQUIRED>
+unless you're passing an access_token (see optional arguments below):
 
 =over 4
 
-=item * C<application_id >
+=item * C<application_id>
 
 Your application id as you get from facebook developers platform
 when you register your application
