@@ -23,7 +23,7 @@ BEGIN {
 use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.8/oauth/access_token';
 use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.8/dialog/oauth';
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub new {
     my ($class,%options) = @_;
@@ -547,7 +547,7 @@ Big Thanks To
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2015 by Mahmoud A. Mehyar
+Copyright (C) 2012-2016 by Mahmoud A. Mehyar
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
