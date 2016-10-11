@@ -35,11 +35,11 @@ sub new {
         croak "You must provide your application secret in new()\nNet::Facebook::Oauth2->new( application_secret => '...' )" unless defined $self->{options}->{application_secret};
     }
 
-    $self->{browser}          = $options{browser} || LWP::UserAgent->new;
+    $self->{browser}          = $options{browser}          || LWP::UserAgent->new;
     $self->{access_token_url} = $options{access_token_url} || ACCESS_TOKEN_URL;
-    $self->{authorize_url}    = $options{authorize_url} || AUTHORIZE_URL;
+    $self->{authorize_url}    = $options{authorize_url}    || AUTHORIZE_URL;
+    $self->{display}          = $options{display}          || 'page'; ## other values popup and wab
     $self->{access_token}     = $options{access_token};
-    $self->{display}          = $options{display} || 'page'; ##other values popup and wab
 
     return bless($self, $class);
 }
