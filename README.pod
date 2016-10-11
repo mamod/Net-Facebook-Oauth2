@@ -19,7 +19,7 @@ Somewhere in your application's login process:
 
     # get the authorization URL for your application
     my $url = $fb->get_authorization_url(
-        scope   => [ 'public_profile', 'email', 'offline_access', 'publish_stream' ],
+        scope   => [ 'public_profile', 'email', 'user_posts', 'manage_pages' ],
         display => 'page'
     );
 
@@ -56,159 +56,8 @@ Later on you can use it to communicate with Facebook on behalf of this user:
 
 Net::Facebook::Oauth2 gives you a way to simply access FaceBook Oauth 2.0 protocol
 
-For more information please see example folder shipped with this Module
-
-=head1 SEE ALSO
-
-For more information about Facebook Oauth 2.0 API
-
-Please Check
-L<http://developers.facebook.com/docs/>
-
-get/post Facebook Graph API
-L<http://developers.facebook.com/docs/api>
-
-=head1 USAGE
-
-=head2 C<Net::Facebook::Oauth-E<gt>new( %args )>
-
-Pass args as hash. C<%args> are:
-
-=over 4
-
-=item * C<application_id >
-
-Your application id as you get from facebook developers platform
-when you register your application
-
-=item * C<application_secret>
-
-Your application secret id as you get from facebook developers platform
-when you register your application
-
-=back
-
-=head2 C<$fb-E<gt>get_authorization_url( %args )>
-
-Return an Authorization URL for your application, once you receive this
-URL redirect user there in order to authorize your application
-
-=over 4
-
-=item * C<scope>
-
-['offline_access','publish_stream',...]
-
-Array of Extended permissions as described by facebook Oauth2.0 API
-you can get more information about scope/Extended Permission from
-http://developers.facebook.com/docs/authentication/permissions
-
-Please note that requesting information other than C<public_profile>,
-C<email> and C<user_friends> B<will require your app to be reviewed by Facebook!>
-
-=item * C<callback>
-
-callback URL, where facebook will send users after they authorize
-your application
-
-=item * C<display>
-
-How to display Facebook Authorization page
-
-=over 4
-
-=item * C<page>
-
-This will display facebook authorization page as full page
-
-=item * C<popup>
-
-This option is useful if you want to popup authorization page
-as this option tell facebook to reduce the size of the authorization page
-
-=item * C<wab>
-
-From the name, for wab and mobile applications this option is the best
-facebook authorization page will fit there :)
-
-=back
-
-=back
-
-=head2 C<$fb-E<gt>get_access_token( %args )>
-
-Returns access_token string
-One arg to pass
-
-=over 4
-
-=item * C<code>
-
-This is the verifier code that facebook send back to your
-callback URL once user authorize your app, you need to capture
-this code and pass to this method in order to get access_token
-
-Verifier code will be presented with your callback URL as code
-parameter as the following
-
-http://your-call-back-url.com?code=234er7y6fdgjdssgfsd...
-
-When access token is returned you need to save it in a secure
-place in order to use it later in your application
-
-=back
-
-=head2 C<$fb-E<gt>get( $url,$args )>
-
-Send get request to facebook and returns response back from facebook
-
-=over 4
-
-=item * C<url>
-
-Facebook Graph API URL as string
-
-=item * C<$args>
-
-hashref of parameters to be sent with graph API URL if required
-
-=back
-
-The response returned can be formatted as the following
-
-=over 4
-
-=item * C<$responseE<gt>as_json>
-
-Returns response as json object
-
-=item * C<$responseE<gt>as_hash>
-
-Returns response as perl hashref
-
-=back
-
-For more information about facebook grapg API, please check
-http://developers.facebook.com/docs/api
-
-=head2 C<$fb-E<gt>post( $url,$args )>
-
-Send post request to facebook API, usually to post something
-
-=over 4
-
-=item * C<url>
-
-Facebook Graph API URL as string
-
-=item * C<$args>
-
-hashref of parameters to be sent with graph API URL
-
-=back
-
-For more information about facebook grapg API, please check
-http://developers.facebook.com/docs/api
+For more information please see example folder shipped with this Module, or refer
+to the L<full documentation|https://metacpan.org/pod/Net::Facebook::Oauth2>.
 
 =head1 INSTALLATION
 
@@ -243,7 +92,7 @@ Big Thanks To
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2015 by Mahmoud A. Mehyar
+Copyright (C) 2012-2016 by Mahmoud A. Mehyar
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
