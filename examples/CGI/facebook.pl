@@ -25,17 +25,12 @@ sub facebook {
         callback => 'http://your-domain.com/callback',  ##Callback URL, facebook will redirect users after authintication
     );
 
-    my $url = $fb->get_authorization_url(
-        scope => ['offline_access','publish_stream', 'user_friends'], ###pass scope/Extended Permissions params as an array telling facebook how you want to use this access
-        display => 'page' ## how to display authorization page, other options popup "to display as popup window" and wab "for mobile apps"
-    );
-
-    ###scope/Extended Permissions description
-    ##offline_access : Allow your application to edit profile while user is not online
-    ##publish_stream : read write access
-    ##user_friends: list of user's friends
     ##you can find more about facebook scopes/Extended Permissions at
     ##http://developers.facebook.com/docs/authentication/permissions
+    my $url = $fb->get_authorization_url(
+        scope => ['user_posts','manage_pages', 'user_friends'], ###pass scope/Extended Permissions params as an array telling facebook how you want to use this access
+        display => 'page' ## how to display authorization page, other options popup "to display as popup window" and wab "for mobile apps"
+    );
 
     ##now redirect to the authorization page
     print $cgi->redirect($url);
