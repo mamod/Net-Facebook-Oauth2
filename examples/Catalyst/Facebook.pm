@@ -35,14 +35,10 @@ facebook developer platfor for your application
 
             ##there is no verifier code passed so let's create authorization URL and redirect to it
             my $url = $fb->get_authorization_url(
-                scope => ['offline_access','publish_stream', 'user_friends'], ###pass scope/Extended Permissions params as an array telling facebook how you want to use this access
+                scope => ['user_posts','manage_pages', 'user_friends'], ###pass scope/Extended Permissions params as an array telling facebook how you want to use this access
                 display => 'page' ## how to display authorization page, other options popup "to display as popup window" and wab "for mobile apps"
             );
 
-            ###scope/Extended Permissions description
-            ##offline_access : Allow your application to edit profile while user is not online
-            ##publish_stream : read write access
-            #user_friends: list of user's friends
             ##you can find more about facebook scopes/Extended Permissions at
             ##http://developers.facebook.com/docs/authentication/permissions
             $c->res->redirect($url);
@@ -71,7 +67,7 @@ facebook developer platfor for your application
 
         ##lets get list of friends for the authorized user
         my $info = $fb->get(
-            'https://graph.facebook.com/v2.2/me' ##Facebook API URL
+            'https://graph.facebook.com/v2.8/me' ##Facebook API URL
         );
 
         $c->res->body($info->as_json); ##as_json method will print response as json object
@@ -89,33 +85,10 @@ facebook developer platfor for your application
 
         ##lets get list of friends for the authorized user
         my $friends = $fb->get(
-            'https://graph.facebook.com/v2.2/me/friends' ##Facebook 'list friend' Graph API URL
+            'https://graph.facebook.com/v2.8/me/friends' ##Facebook 'list friend' Graph API URL
         );
 
         $c->res->body($friends->as_json);
-    }
-
-    ###example 3 "get" search posts with some keyword
-    sub search : Local {
-        my ( $self, $c ) = @_;
-        my $params = $c->req->parameters;
-
-        my $fb = Net::Facebook::Oauth2->new(
-            access_token => $c->session->{access_token}
-        );
-
-        ##lets search all posts with some keyword
-        ##https://graph.facebook.com/search?q=watermelon&type=post
-
-        my $topics = $fb->get(
-            'https://graph.facebook.com/v2.2/search', ##Facebook 'search' Graph API URL
-            {
-                q => 'Keyword',
-                type => 'post'
-            }
-        );
-
-        $c->res->body($topics->as_json);
     }
 
     ####post to facebook example
@@ -130,7 +103,7 @@ facebook developer platfor for your application
         );
 
         my $res = $fb->post(
-            'https://graph.facebook.com/v2.2/me/feed', ###API URL
+            'https://graph.facebook.com/v2.8/me/feed', ###API URL
             {
                 message => 'This is a post to my feed from Net::Facebook::Oauth2' ##hash of params/variables (param=>value)
             }
