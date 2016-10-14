@@ -524,6 +524,7 @@ Facebook Graph API URL as string
 
 hashref of parameters to be sent with graph API URL
 
+=back
 
 =head1 AUTHOR
 
