@@ -1,5 +1,14 @@
 Revision history for Perl module Net::Facebook::Oauth2.
 
+0.10  2016 2016-10-14
+	- Update to Graph API v2.8
+	- add missing deps
+	- minor code tidying
+	- documentation improvements
+	- trigger warning when API is about to deprecate
+	- update example and readme to v2.8
+	- All changes in this release contributed by (Breno G. de Oliveira)
+
 0.09  2015 2015-03-25
 	- Code clean (Breno G. de Oliveira)
 	- Using JSON::MaybeXS instead of deprecated JSON::ANY (Breno G. de Oliveira)
