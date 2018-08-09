@@ -8,9 +8,6 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
-use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v3.1/oauth/access_token';
-use constant AUTHORIZE_URL    => 'https://www.facebook.com/v3.1/dialog/oauth';
-
 our $VERSION = '0.10';
 
 sub new {
@@ -18,16 +15,40 @@ sub new {
     my $self = {};
     $self->{options} = \%options;
 
-    if (!$options{access_token}){
+    my $api_version = defined $options{api_version} ? $options{api_version} : 'v3.1';
+
+    if (!defined $options{access_token}){
         croak "You must provide your application id in new()\nNet::Facebook::Oauth2->new( application_id => '...' )" unless defined $self->{options}->{application_id};
         croak "You must provide your application secret in new()\nNet::Facebook::Oauth2->new( application_secret => '...' )" unless defined $self->{options}->{application_secret};
     }
 
-    $self->{browser}          = $options{browser}          || LWP::UserAgent->new;
-    $self->{access_token_url} = $options{access_token_url} || ACCESS_TOKEN_URL;
-    $self->{authorize_url}    = $options{authorize_url}    || AUTHORIZE_URL;
-    $self->{display}          = $options{display}          || 'page'; ## other values popup and wab
-    $self->{access_token}     = $options{access_token};
+    if (defined $options{access_token_url}) {
+        croak "cannot pass access_token_url AND api_version" if defined $options{api_version};
+        $self->{access_token_url} = $options{access_token_url};
+    }
+    else {
+        $self->{access_token_url} = "https://graph.facebook.com/$api_version/oauth/access_token";
+    }
+
+    if (defined $options{authorize_url}) {
+        croak "cannot pass authorize_url AND api_version" if defined $options{api_version};
+        $self->{authorize_url} = $options{authorize_url};
+    }
+    else {
+        $self->{authorize_url} = "https://www.facebook.com/$api_version/dialog/oauth";
+    }
+
+    if (defined $options{debug_token_url}) {
+        croak "cannot pass debug_token_url AND api_version" if defined $options{api_version};
+        $self->{debug_token_url} = $options{debug_token_url};
+    }
+    else {
+        $self->{debug_token_url} = "https://graph.facebook.com/$api_version/debug_token";
+    }
+
+    $self->{browser}      = $options{browser} || LWP::UserAgent->new;
+    $self->{display}      = $options{display} || 'page'; ## other values popup and wab
+    $self->{access_token} = $options{access_token};
 
     return bless($self, $class);
 }
@@ -341,6 +362,12 @@ C<is_success> and C<content>.
 =item * C<display>
 
 See C<display> under the C<get_authorization_url> method below.
+
+=item * C<api_version>
+
+Use this to replace the API version on all endpoints. The default
+value is 'v3.1'. Note that defining an api_version parameter together with
+C<authorize_url>, C<access_token_url> or C<debug_token_url> is a fatal error.
 
 =item * C<authorize_url>
 
