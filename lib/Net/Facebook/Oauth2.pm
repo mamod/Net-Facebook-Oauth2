@@ -344,12 +344,17 @@ See C<display> under the C<get_authorization_url> method below.
 
 =item * C<authorize_url>
 
-Overrides the default (2.8) API endpoint for Facebook's oauth.
+Overrides the default (3.1) API endpoint for Facebook's oauth.
 Used mostly for testing new versions.
 
 =item * C<access_token_url>
 
-Overrides the default (2.8) API endpoint for Facebook's access token.
+Overrides the default (3.1) API endpoint for Facebook's access token.
+Used mostly for testing new versions.
+
+=item * C<debug_token_url>
+
+Overrides the default (3.1) API endpoint for Facebook's token information.
 Used mostly for testing new versions.
 
 =back
