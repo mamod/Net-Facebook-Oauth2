@@ -8,20 +8,8 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
-BEGIN {
-    my @time = localtime;
-    if ($time[5] >= 118 && $time[4] > 8) {
-        warn "\n****************************************************************************\n"
-           . "[WARNING] This version of Net::Facebook::Oauth2 uses Facebook Graph API v2.8\n"
-           . "which is SCHEDULED FOR DEPRECATION on 5 October 2018. If this module\n"
-           . "(together with any associated code) is not updated, it may stop working!\n"
-           . "****************************************************************************\n"
-           ;
-    }
-};
-
-use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v2.8/oauth/access_token';
-use constant AUTHORIZE_URL    => 'https://www.facebook.com/v2.8/dialog/oauth';
+use constant ACCESS_TOKEN_URL => 'https://graph.facebook.com/v3.1/oauth/access_token';
+use constant AUTHORIZE_URL    => 'https://www.facebook.com/v3.1/dialog/oauth';
 
 our $VERSION = '0.10';
 
@@ -63,10 +51,11 @@ sub get_authorization_url {
         my $scope = join(',', @{$params{scope}});
         $url .= '&scope=' . $scope if $scope;
     }
-    $url .= '&state=' . $params{state}                 if $params{state};
+    # state is now required:
+    $url .= '&state=' . (defined $params{state} ? $params{state} : time);
+
     $url .= '&response_type=' . $params{response_type} if $params{response_type};
     $url .= '&auth_type=' . $params{auth_type}         if $params{auth_type};
-
     $url .= "&display=".$params{display};
 
     return $url;
@@ -186,18 +175,15 @@ sub _has_access_token {
 __END__
 =head1 NAME
 
-Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth v2.0 protocol
+Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth 2.0 protocol
 
 =for html
 <a href="https://travis-ci.org/mamod/Net-Facebook-Oauth2"><img src="https://travis-ci.org/mamod/Net-Facebook-Oauth2.svg?branch=master"></a>
 
 =head1 FACEBOOK GRAPH API VERSION
 
-This module complies to Facebook Graph API version 2.8, the latest
-at the time of publication, B<< scheduled for deprecation on October 5th, 2018 >>.
-
-One month prior to that, using this version of Net::Facebook::Oauth2 will
-trigger a warning message.
+This module complies to Facebook Graph API version 3.1, the latest
+at the time of publication, B<< scheduled for deprecation after July 26th, 2020 >>.
 
 =head1 SYNOPSIS
 
@@ -213,7 +199,7 @@ Somewhere in your application's login process:
 
     # get the authorization URL for your application
     my $url = $fb->get_authorization_url(
-        scope   => [ 'public_profile', 'email', 'user_about_me', 'manage_pages' ],
+        scope   => [ 'name', 'email', 'profile_picture' ],
         display => 'page'
     );
 
@@ -243,7 +229,7 @@ of this user:
     );
 
     my $info = $fb->get(
-        'https://graph.facebook.com/v2.8/me'   # Facebook API URL
+        'https://graph.facebook.com/v3.1/me'   # Facebook API URL
     );
 
     print $info->as_json;
@@ -316,13 +302,6 @@ Used mostly for testing new versions.
 Overrides the default (2.8) API endpoint for Facebook's access token.
 Used mostly for testing new versions.
 
-=item * C<auth_type>
-
-When a user declines a given permission, you must reauthorize them. But when
-you do so, any previously declined permissions will not be asked again by
-Facebook. Set this argument to C<'rerequest'> to explicitly tell the dialog
-you're re-asking for a declined permission.
-
 =back
 
 =head2 C<$fb-E<gt>get_authorization_url( %args )>
@@ -353,21 +332,31 @@ This method also accepts the following I<OPTIONAL> arguments:
 
 =item * C<scope>
 
-    scope => ['user_events','manage_pages', ...]
+    scope => ['user_birthday','user_friends', ...]
 
-Array of Extended permissions as described by facebook Oauth API.
+Array of Extended permissions as described by the Facebook Oauth API.
 You can get more information about scope/Extended Permission from
 
 L<https://developers.facebook.com/docs/facebook-login/permissions/>
 
-Please note that requesting information other than C<public_profile>,
-C<email> and C<user_friends> B<will require your app to be reviewed by Facebook!>
+Please note that requesting information other than C<name>, C<email> and
+C<profile_picture> B<will require your app to be reviewed by Facebook!>
 
 =item * C<state>
 
     state => '123456abcde'
 
-An arbitrary unique string provided by you to guard against Cross-site Request Forgery.
+An arbitrary unique string provided by you to guard against Cross-site Request
+Forgery. This value will be returned to you by Facebook, unchanged. Note that,
+as of Facebook API v3.0, this argument is I<mandatory>, so if you don't
+provide a 'state' argument, we will default to C<time()>.
+
+=item * C<auth_type>
+
+When a user declines a given permission, you must reauthorize them. But when
+you do so, any previously declined permissions will not be asked again by
+Facebook. Set this argument to C<'rerequest'> to explicitly tell the dialog
+you're re-asking for a declined permission.
 
 =item * C<display>
 
@@ -389,8 +378,8 @@ as this option tell facebook to reduce the size of the authorization page
 
 =item * C<wab>
 
-From the name, for wab and mobile applications this option is the best
-facebook authorization page will fit there :)
+From the name, for wab and mobile applications this option is the best, as
+the facebook authorization page will fit there :)
 
 =back
 
@@ -402,7 +391,10 @@ When the redirect back to the app occurs, determines whether the response
 data is in URL parameters or fragments. Defaults to C<code>, which is
 Facebook's default and useful for cases where the server handles the token
 (which is most likely why you are using this module), but can be also be
-C<token>, C<code%20token>, or C<granted_scopes>. Please see
+C<token>, C<code%20token>, or C<granted_scopes>. Note that changing this to
+anything other than 'code' might change the login flow described in this
+documentation, rendering calls to C<get_access_token()> pointless.
+Please see
 L<< Facebook's login documentation|https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow >>
 for more information.
 
@@ -413,7 +405,8 @@ for more information.
 This method issues a GET request to Facebook's API to retrieve the
 access token string for the specified code (passed as an argument).
 
-Returns the access token string or raises an exception in case of errors.
+Returns the access token string or raises an exception in case of errors
+(B<make sure to trap calls with eval blocks or a try/catch module>).
 
 You should call this method inside the route for the callback URI defined
 in the C<get_authorization_url> method. It receives the following arguments:
