@@ -97,6 +97,40 @@ sub get_access_token {
     }
 }
 
+
+sub debug_token {
+    my ($self,%params) = @_;
+    croak "You must pass the 'input' access token to inspect"
+        unless defined $params{input};
+
+    # NOTE: according to FB's documentation, instead of passing an
+    # app token we can simply pass access_token=app_id|app_secret:
+    # https://developers.facebook.com/docs/facebook-login/access-tokens/#apptokens
+    my $getURL = $self->{debug_token_url}
+        . "?input_token=" . uri_escape($params{input})
+        . "&access_token="
+        . join('|',
+            uri_escape($self->{options}->{application_id})
+            uri_escape($self->{options}->{application_secret})
+        );
+
+    my $response = $self->{browser}->get($getURL);
+    my $json     = decode_json($response->content());
+
+    if (!$response->is_success || exists $json->{error}){
+        ##got an error response from facebook. die and display error message
+        croak "'" . $json->{error}->{type}. "'" . " " .$json->{error}->{message};
+    }
+    elsif (!exists $json->{app_id} || !exists $json->{user_id}) {
+        return;
+    }
+    elsif (!$params{skip_check} && (''.$json->{app_id}) ne (''.$self->{options}->{application_id}) ) {
+        return;
+    }
+    return $json;
+}
+
+
 sub get {
     my ($self,$url,$params) = @_;
     unless ($self->_has_access_token($url)) {
@@ -216,10 +250,26 @@ sends to get the access token:
     # provides (e.g. $c->req->param('code'), $cgi->param('code'), etc)
     my $code = param('code');
 
-    my $access_token = $fb->get_access_token(code => $code);
+    use Try::Tiny;  # or eval {}, or whatever
 
-If you got so far, your user is logged! Save this access token in your
-database or session.
+    my ($unique_id, $access_token);
+    try {
+        $access_token = $fb->get_access_token(code => $code); # <-- could die!
+
+        my $access_data = $fb->debug_token( input => $access_token );
+        if ($access_data->{is_valid}) {
+            $unique_id = $access_data->{user_id};
+            # you could also check here for what scopes were granted to you
+            # by inspecting $access_data->{scopes}->@*
+        }
+    } catch {
+        # handle errors here!
+    };
+
+If you got so far, your user is logged! Save the access token in your
+database or session. As shown in the example above, Facebook also provides
+a unique I<user_id> for this token so you can associate it with a particular
+user of your app.
 
 Later on you can use that access token to communicate with Facebook on behalf
 of this user:
@@ -437,15 +487,35 @@ token to that user and issue API requests to Facebook on their behalf.
 To know I<WHICH> user has granted you the authorization (e.g. when building
 a login system to associate that token with a unique user on your database),
 you must make a request to fetch Facebook's own unique identifier for that
-user, and then associate your own user's unique id to Facebook's. This is
-usually done by making a GET request to the C<me> API endpoint, as shown
-in the SYNOPSIS.
+user, and then associate your own user's unique id to Facebook's.
+
+This was usually done by making a GET request to the C<me> API endpoint.
+However, Facebook has introduced a new endpoint for that flow so now
+you must call C<debug_token()> as shown in the SYNOPSIS.
 
 B<IMPORTANT:> Expect that the length of all access token types will change
 over time as Facebook makes changes to what is stored in them and how they
 are encoded. You can expect that they will grow and shrink over time.
 Please use a variable length data type without a specific maximum size to
 store access tokens.
+
+=head2 C<$fb-E<gt>debug_token( input =E<gt> $access_token )>
+
+This method should be called right after C<get_access_token()>. It will
+query Facebook for details about the given access token and validate that
+it was indeed granted to your app (and not someone else's).
+
+It requires a single argument, C<input>, containing the access code obtained
+from calling C<get_access_token>.
+
+It croaks on HTTP/connection/Facebook errors, returns nothing if for whatever
+reason the response is invalid without errors (e.g. no app_id and no user_id),
+and also if the returned app_id is not the same as your own application_id
+(pass a true value to C<skip_check> to skip this validation).
+
+If all goes well, it returns a hashref with the JSON structure returned by
+Facebook.
+
 
 =head2 C<$fb-E<gt>get( $url, $args )>
 
