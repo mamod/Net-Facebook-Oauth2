@@ -262,7 +262,7 @@ Net::Facebook::Oauth2 - a simple Perl wrapper around Facebook OAuth 2.0 protocol
 =head1 FACEBOOK GRAPH API VERSION
 
 This module complies to Facebook Graph API version 3.1, the latest
-at the time of publication, B<< scheduled for deprecation after July 26th, 2020 >>.
+at the time of publication, B<< scheduled for deprecation not sooner than July 26th, 2020 >>.
 
 =head1 SYNOPSIS
 
