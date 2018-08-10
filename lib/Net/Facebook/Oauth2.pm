@@ -118,6 +118,31 @@ sub get_access_token {
     }
 }
 
+sub get_long_lived_token {
+    my ($self,%params) = @_;
+
+    if (!$self->{access_token}) {
+        croak "You must pass the access_token" unless defined $params{access_token};
+    }
+
+    my $getURL = $self->{access_token_url}
+        . '?grant_type=fb_exchange_token'
+        . '&client_id=' . uri_escape($self->{options}->{application_id})
+        . '&client_secret=' . uri_escape($self->{options}->{application_secret})
+        . '&fb_exchange_token=' . uri_escape($self->{access_token} || $params{access_token})
+        ;
+    my $response = $self->{browser}->get($getURL);
+    my $json     = decode_json($response->content());
+    if (!$response->is_success || exists $json->{error}) {
+        croak "'" . $json->{error}->{type}. "'" . " " .$json->{error}->{message};
+    }
+    elsif ($json->{access_token}) {
+        return $self->{access_token} = $json->{access_token};
+    }
+    else {
+        croak "can't get long lived access token from " . $response->content();
+    }
+}
 
 sub debug_token {
     my ($self,%params) = @_;
@@ -276,8 +301,11 @@ sends to get the access token:
     try {
         $access_token = $fb->get_access_token(code => $code); # <-- could die!
 
+        # Facebook tokens last ~2h, but you may upgrade them to ~60d:
+        $access_token = $fb->get_long_lived_token( access_token => $access_token );
+
         my $access_data = $fb->debug_token( input => $access_token );
-        if ($access_data->{is_valid}) {
+        if ($access_data && $access_data->{is_valid}) {
             $unique_id = $access_data->{user_id};
             # you could also check here for what scopes were granted to you
             # by inspecting $access_data->{scopes}->@*
@@ -491,7 +519,11 @@ This method issues a GET request to Facebook's API to retrieve the
 access token string for the specified code (passed as an argument).
 
 Returns the access token string or raises an exception in case of errors
-(B<make sure to trap calls with eval blocks or a try/catch module>).
+(B<make sure to trap calls with eval blocks or a try/catch module>). Note
+that Facebook's access tokens are short-lived, around 2h of idle time
+before expiring. If you want to "upgrade" the token to a long lived one
+(with around 60 days of idle time), use this token to feed the
+C<get_long_lived_token()> method.
 
 You should call this method inside the route for the callback URI defined
 in the C<get_authorization_url> method. It receives the following arguments:
@@ -536,6 +568,17 @@ over time as Facebook makes changes to what is stored in them and how they
 are encoded. You can expect that they will grow and shrink over time.
 Please use a variable length data type without a specific maximum size to
 store access tokens.
+
+=head2 C<$fb-E<gt>get_long_lived_token( access_token =E<gt> $access_token )
+
+Asks facebook to retrieve the long-lived (~60d) version of the provided
+short-lived (~2h) access token retrieved from C<get_access_token()>. If
+successful, this method will return the long-lived token, which you can
+use to replace the short-lived one. Otherwise, it croaks with an error
+message, in which case you can continue to use the short-lived version.
+
+L<See here|https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing>
+for the gory details.
 
 =head2 C<$fb-E<gt>debug_token( input =E<gt> $access_token )>
 
