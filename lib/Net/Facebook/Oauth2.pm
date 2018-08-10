@@ -301,7 +301,7 @@ sends to get the access token:
     try {
         $access_token = $fb->get_access_token(code => $code); # <-- could die!
 
-        # Facebook tokens last ~2h, but you may upgrade them to ~60d:
+        # Facebook tokens last ~2h, but you may upgrade them to ~60d if you want:
         $access_token = $fb->get_long_lived_token( access_token => $access_token );
 
         my $access_data = $fb->debug_token( input => $access_token );
@@ -338,9 +338,11 @@ C<< $info->{id} >>
 
 =head1 DESCRIPTION
 
-Net::Facebook::Oauth2 gives you a way to simply access FaceBook Oauth 2.0 protocol
+Net::Facebook::Oauth2 gives you a way to simply access FaceBook Oauth 2.0
+protocol.
 
-For more information please see example folder shipped with this Module
+The example folder contains some snippets you can look at, or for more
+information just keep reading :)
 
 =head1 SEE ALSO
 
