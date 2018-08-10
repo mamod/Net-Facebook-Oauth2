@@ -278,7 +278,7 @@ Somewhere in your application's login process:
 
     # get the authorization URL for your application
     my $url = $fb->get_authorization_url(
-        scope   => [ 'name', 'email', 'profile_picture' ],
+        scope   => [ 'email' ],
         display => 'page'
     );
 
