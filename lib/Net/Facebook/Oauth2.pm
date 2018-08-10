@@ -131,24 +131,23 @@ sub debug_token {
         . "?input_token=" . uri_escape($params{input})
         . "&access_token="
         . join('|',
-            uri_escape($self->{options}->{application_id})
+            uri_escape($self->{options}->{application_id}),
             uri_escape($self->{options}->{application_secret})
         );
 
     my $response = $self->{browser}->get($getURL);
     my $json     = decode_json($response->content());
-
     if (!$response->is_success || exists $json->{error}){
         ##got an error response from facebook. die and display error message
         croak "'" . $json->{error}->{type}. "'" . " " .$json->{error}->{message};
     }
-    elsif (!exists $json->{app_id} || !exists $json->{user_id}) {
+    elsif (!exists $json->{data}->{app_id} || !exists $json->{data}->{user_id}) {
         return;
     }
-    elsif (!$params{skip_check} && (''.$json->{app_id}) ne (''.$self->{options}->{application_id}) ) {
+    elsif (!$params{skip_check} && (''.$json->{data}->{app_id}) ne (''.$self->{options}->{application_id}) ) {
         return;
     }
-    return $json;
+    return $json->{data};
 }
 
 
@@ -304,6 +303,10 @@ of this user:
     );
 
     print $info->as_json;
+
+NOTE: if you skipped the call to C<debug_token()> you can still find the
+unique user id value with a call to the 'me' endpoint shown above, under
+C<< $info->{id} >>
 
 =head1 DESCRIPTION
 
@@ -521,9 +524,12 @@ a login system to associate that token with a unique user on your database),
 you must make a request to fetch Facebook's own unique identifier for that
 user, and then associate your own user's unique id to Facebook's.
 
-This was usually done by making a GET request to the C<me> API endpoint.
-However, Facebook has introduced a new endpoint for that flow so now
-you must call C<debug_token()> as shown in the SYNOPSIS.
+This was usually done by making a GET request to the C<me> API endpoint and
+looking for the 'id' field. However, Facebook has introduced a new endpoint
+for that flow that returns the id (this time as 'user_id') and some extra
+validation data, like whether the token is valid, to which app it refers to,
+what scopes the user agreed to, etc, so now you are encouraged to call the
+C<debug_token()> method as shown in the SYNOPSIS.
 
 B<IMPORTANT:> Expect that the length of all access token types will change
 over time as Facebook makes changes to what is stored in them and how they
