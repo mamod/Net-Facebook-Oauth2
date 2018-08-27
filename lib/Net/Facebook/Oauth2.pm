@@ -571,7 +571,7 @@ are encoded. You can expect that they will grow and shrink over time.
 Please use a variable length data type without a specific maximum size to
 store access tokens.
 
-=head2 C<$fb-E<gt>get_long_lived_token( access_token =E<gt> $access_token )
+=head2 C<$fb-E<gt>get_long_lived_token( access_token =E<gt> $access_token )>
 
 Asks facebook to retrieve the long-lived (~60d) version of the provided
 short-lived (~2h) access token retrieved from C<get_access_token()>. If
