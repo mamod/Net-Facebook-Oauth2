@@ -67,7 +67,7 @@ Later on you can use it to communicate with Facebook on behalf of this user:
     );
 
     my $info = $fb->get(
-        'https://graph.facebook.com/v3.1/me'   # Facebook API URL
+        'https://graph.facebook.com/v4.0/me'   # Facebook API URL
     );
 
     print $info->as_json;
