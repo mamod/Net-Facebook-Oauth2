@@ -8,7 +8,7 @@ use URI::Escape;
 use JSON::MaybeXS;
 use Carp;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 sub new {
     my ($class,%options) = @_;
@@ -694,7 +694,7 @@ Big Thanks To
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2016 by Mahmoud A. Mehyar
+Copyright (C) 2012-2019 by Mahmoud A. Mehyar
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
