@@ -7,3 +7,4 @@ install:
   - "cpanm -n JSON::Any"
   - "cpanm -n Test::MockModule"
   - "cpanm -n Test::MockObject"
+  - "cpanm -n LWP::UserAgent"
